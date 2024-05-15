@@ -17,7 +17,7 @@ export class Analytics {
     }
 
     async track(namespace: string, event: object = {}, opts?: TrackOptions) {
-        
+
         let key = `analytics::${namespace}`
 
         if (!opts?.persist) {
@@ -25,6 +25,7 @@ export class Analytics {
         }
 
         await redis.hincrby(key, JSON.stringify(event), 1)
+        if (!opts?.persist) await redis.expire(key, this.retention)
     }
 }
 

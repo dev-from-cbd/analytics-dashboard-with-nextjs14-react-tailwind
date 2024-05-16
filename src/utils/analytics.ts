@@ -31,8 +31,8 @@ export class Analytics {
     async retrieveDays(namespace: string, nDays: number) {
         type AnalyticsPromise = ReturnType<typeof analytics.retrieve>
         const promises: AnalyticsPromise[] = []
-        for (let i = 0; i < array.length; i++) {
-            const element = array[i];
+        for (let i = 0; i < nDays; i++) {
+            const formattedDate = array[i];
         }
     }
 

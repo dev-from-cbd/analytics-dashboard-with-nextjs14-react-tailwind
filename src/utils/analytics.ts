@@ -32,7 +32,7 @@ export class Analytics {
         type AnalyticsPromise = ReturnType<typeof analytics.retrieve>
         const promises: AnalyticsPromise[] = []
         for (let i = 0; i < nDays; i++) {
-            const formattedDate = array[i];
+            const formattedDate = getDate(1)
         }
     }
 

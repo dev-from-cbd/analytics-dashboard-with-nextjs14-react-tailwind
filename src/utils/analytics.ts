@@ -1,5 +1,6 @@
 import { redis } from '@/lib/redis'
-import { getDate } from '@/utils/analytics'
+import { getDate } from '@/utils'
+import { parse } from 'date-fns'
 
 type AnalyticsArgs = {
     retention?: number
@@ -17,13 +18,13 @@ export class Analytics {
     }
 
     async track(namespace: string, event: object = {}, opts?: TrackOptions) {
-
         let key = `analytics::${namespace}`
 
         if (!opts?.persist) {
             key += `::${getDate()}`
         }
 
+        // db call to persist this event
         await redis.hincrby(key, JSON.stringify(event), 1)
         if (!opts?.persist) await redis.expire(key, this.retention)
     }
@@ -41,22 +42,29 @@ export class Analytics {
         const fetched = await Promise.all(promises)
 
         const data = fetched.sort((a, b) => {
-            if (parse(a.date, "dd/MM/yyyy", new Date()) > parse(b.date, "dd/MM/yyyy", new Date())) {
+            if (
+                parse(a.date, 'dd/MM/yyyy', new Date()) >
+                parse(b.date, 'dd/MM/yyyy', new Date())
+            ) {
                 return 1
             } else {
                 return -1
             }
         })
+
+        return data
     }
 
     async retrieve(namespace: string, date: string) {
-        const res = await redis.hgetall<Record<string, string>>(`analytics::${namespace}::${date}`)
+        const res = await redis.hgetall<Record<string, string>>(
+            `analytics::${namespace}::${date}`
+        )
 
         return {
             date,
             events: Object.entries(res ?? []).map(([key, value]) => ({
-                [key]: Number(value)
-            }))
+                [key]: Number(value),
+            })),
         }
     }
 }
